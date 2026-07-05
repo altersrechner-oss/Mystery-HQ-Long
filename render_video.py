@@ -12,13 +12,13 @@ pexels_key = os.environ.get('PEXELS_API_KEY')
 chat_id = os.environ.get('CHAT_ID')
 telegram_token = os.environ.get('TELEGRAM_BOT_TOKEN')
 
-# 👇 Naye Creepy/Suspense Channel ka naam 👇
-channel_name = "Midnight Files®" 
+# 👇 Naye Mystery Channel ka naam 👇
+channel_name = "Mystery HQ" 
 
 print(f"DEBUG: Processing {len(scenes_data)} scenes async...")
 
-# 👇 Naye channel ke liye dark, creepy, aur suspenseful fallback keywords 👇
-FALLBACK_KEYWORDS = ["dark forest", "foggy road", "rainy window", "night sky", "abandoned house", "creepy shadows"]
+# 👇 Naye USA Mysteries channel ke liye dark aur suspenseful fallback keywords 👇
+FALLBACK_KEYWORDS = ["cinematic fog", "dark highway USA", "creepy night road", "abandoned house", "creepy forest drone shot"]
 
 TEMP_DIR = "/dev/shm" if os.path.exists("/dev/shm") else os.getcwd()
 
@@ -194,8 +194,8 @@ async def main_pipeline():
         run_id = os.environ.get('GITHUB_RUN_ID', str(int(time.time())))
         tag_name = f"vid-{run_id}"
         
-        # 👇 Naye GitHub Repo ka Link yahan update kar diya gaya hai 👇
-        repo_name = "MidnightFiles2026/Midnight-Files-Long" 
+        # 👇 Naye GitHub Repo ka Link (Dhyan rakhein ki repo GitHub par exactly isi naam se banaya ho) 👇
+        repo_name = "YOUR_GITHUB_USERNAME/Mystery-HQ-Long" 
         
         try:
             cmd = ['gh', 'release', 'create', tag_name, final_video, '--repo', repo_name, '--notes', 'Automated Video Render']
