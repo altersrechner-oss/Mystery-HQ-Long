@@ -1,4 +1,4 @@
-name: Auto Render Midnight Files Video
+name: Auto Render Mystery HQ Video
 
 on:
   repository_dispatch:
