@@ -194,8 +194,8 @@ async def main_pipeline():
         run_id = os.environ.get('GITHUB_RUN_ID', str(int(time.time())))
         tag_name = f"vid-{run_id}"
         
-        # 👇 Naye GitHub Repo ka Link (Dhyan rakhein ki repo GitHub par exactly isi naam se banaya ho) 👇
-        repo_name = "YOUR_GITHUB_USERNAME/Mystery-HQ-Long" 
+        # 👇 YAHAN MAIN PROBLEM THI. Ise aapke exact GitHub details ke sath fix kar diya gaya hai 👇
+        repo_name = "altersrechner-oss/Mystery-HQ-Long" 
         
         try:
             cmd = ['gh', 'release', 'create', tag_name, final_video, '--repo', repo_name, '--notes', 'Automated Video Render']
