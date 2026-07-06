@@ -169,8 +169,8 @@ async def main_pipeline():
         if os.path.exists(bgm_path):
             bgm_cmd = [
                 'ffmpeg', '-y', '-i', raw_video, '-stream_loop', '-1', '-i', bgm_path,
-                # 👇 BGM Volume changed here to 0.35 👇
-                '-filter_complex', '[0:a]volume=1.0[voice];[1:a]volume=0.35[bgm];[voice][bgm]amix=inputs=2:duration=first:dropout_transition=0[aout_mix];[aout_mix]volume=2.0[aout]',
+                # 👇 BGM Volume changed here to 0.80 👇
+                '-filter_complex', '[0:a]volume=1.0[voice];[1:a]volume=0.80[bgm];[voice][bgm]amix=inputs=2:duration=first:dropout_transition=0[aout_mix];[aout_mix]volume=2.0[aout]',
                 '-map', '0:v', '-map', '[aout]',
                 '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', final_video
             ]
