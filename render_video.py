@@ -19,7 +19,6 @@ channel_name = "Mystery HQ"
 print(f"DEBUG: Processing {len(scenes_data)} scenes async...")
 
 # --- SMART DYNAMIC FALLBACK KEYWORDS ---
-# GitHub Actions se jo bhi fallback theme aayegi, yeh usey list mein badal dega.
 fallback_env = os.environ.get('FALLBACK_KEYWORDS', 'cinematic fog, dark highway USA, creepy night road, abandoned house, creepy forest drone shot')
 FALLBACK_KEYWORDS = [kw.strip() for kw in fallback_env.split(',')]
 
@@ -31,12 +30,11 @@ async def fetch_pexels_video(session, keyword):
         for attempt in range(2):
             try:
                 await asyncio.sleep(random.uniform(0.1, 0.5))
-                # Jab attempts badhein toh safe page=1 rakho taaki khali result na aaye
                 random_page = random.randint(1, 5) if attempt == 0 else 1 
-                url = f"https://api.pexels.com/videos/search?query={urllib.parse.quote(query)}&per_page=5&page={random_page}&orientation=landscape&size=large"
+                # [FIXED]: Removed '&size=large' to drastically increase available video results
+                url = f"https://api.pexels.com/videos/search?query={urllib.parse.quote(query)}&per_page=5&page={random_page}&orientation=landscape"
                 
                 async with session.get(url, headers={"Authorization": pexels_key}, timeout=10) as response:
-                    # [IMPROVED]: Added Rate Limit (429) Handling
                     if response.status == 429:
                         await asyncio.sleep(2)
                         continue
@@ -44,7 +42,14 @@ async def fetch_pexels_video(session, keyword):
                     if response.status == 200:
                         res = await response.json()
                         if res.get('videos') and len(res['videos']) > 0:
-                            return random.choice(res['videos'])['video_files'][0]['link']
+                            chosen_video = random.choice(res['videos'])
+                            # [FIXED]: Always pick a valid high-quality MP4 file instead of blind index [0]
+                            mp4_files = [f for f in chosen_video.get('video_files', []) if f.get('file_type') == 'video/mp4']
+                            if mp4_files:
+                                mp4_files.sort(key=lambda x: x.get('width', 0), reverse=True)
+                                return mp4_files[0]['link']
+                            else:
+                                return chosen_video['video_files'][0]['link']
             except Exception:
                 continue
     return None
@@ -104,8 +109,8 @@ async def process_scene(session, i, scene):
                     async with session.get(vid_url, timeout=15) as resp:
                         if resp.status == 200:
                             vid_bytes = await resp.read()
-                            # [IMPROVED]: Increased size threshold to 200KB to strictly avoid corrupt/small files
-                            if len(vid_bytes) > 200000: 
+                            # [FIXED]: Decreased size threshold to 30KB so perfect but short clips aren't discarded
+                            if len(vid_bytes) > 30000: 
                                 with open(vid_path, "wb") as f:
                                     f.write(vid_bytes)
                                 is_valid_video = True
