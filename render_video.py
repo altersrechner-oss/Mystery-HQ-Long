@@ -27,16 +27,16 @@ TEMP_DIR = "/dev/shm" if os.path.exists("/dev/shm") else os.getcwd()
 async def fetch_pexels_video(session, keyword):
     queries_to_try = [keyword] + FALLBACK_KEYWORDS
     for query in queries_to_try:
-        for attempt in range(2):
+        for attempt in range(3): # Increased fetch attempts
             try:
                 await asyncio.sleep(random.uniform(0.1, 0.5))
                 random_page = random.randint(1, 5) if attempt == 0 else 1 
                 # [FIXED]: Removed '&size=large' to drastically increase available video results
                 url = f"https://api.pexels.com/videos/search?query={urllib.parse.quote(query)}&per_page=5&page={random_page}&orientation=landscape"
                 
-                async with session.get(url, headers={"Authorization": pexels_key}, timeout=10) as response:
+                async with session.get(url, headers={"Authorization": pexels_key}, timeout=20) as response: # Increased timeout to 20s
                     if response.status == 429:
-                        await asyncio.sleep(2)
+                        await asyncio.sleep(5) # Increased sleep to handle rate limits better
                         continue
                         
                     if response.status == 200:
@@ -100,13 +100,13 @@ async def process_scene(session, i, scene):
         is_valid_video = False
         vid_url = await fetch_pexels_video(session, keyword)
         
-        for download_attempt in range(3):
+        for download_attempt in range(6): # Increased attempts from 3 to 6 to guarantee video
             if not vid_url:
                 vid_url = await fetch_pexels_video(session, random.choice(FALLBACK_KEYWORDS))
                 
             if vid_url:
                 try:
-                    async with session.get(vid_url, timeout=15) as resp:
+                    async with session.get(vid_url, timeout=60) as resp: # Increased timeout from 15s to 60s for 4K files
                         if resp.status == 200:
                             vid_bytes = await resp.read()
                             # [FIXED]: Decreased size threshold to 30KB so perfect but short clips aren't discarded
@@ -121,6 +121,7 @@ async def process_scene(session, i, scene):
                     print(f"Failed to download video for scene {i} on attempt {download_attempt+1}: {str(e)}")
                     
             vid_url = None # Reset for fallback fetch
+            await asyncio.sleep(2) # Added a small delay before next retry to avoid connection drops
 
         # --- 3. VIDEO RENDER ---
         pop_path = os.path.abspath("pop.mp3")
